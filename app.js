@@ -5,7 +5,7 @@
 import { getCanvas, rect, circle, the_U } from "./canvas_lib.js";
 import XwingFighter from "./xwingfighter.js";
 import TieFighter from "./tiefighter.js";
-import Tie from "./tiefighter.js";
+
 
 // outer function
 function Init() {
@@ -55,10 +55,23 @@ function Init() {
 
 
   let ties = [];
-  ties[0] = new TieFighter(ctx);
-  ties[1] = new TieFighter(ctx);
-  ties[2] = new TieFighter(ctx);
-  ties[3] = new TieFighter(ctx);
+  let xwing;
+  let tieImg = new Image();
+  let xwingImg = new Image();
+
+  tieImg.onload = function(){
+    ties[0] = new TieFighter(ctx,tieImg);
+    ties[1] = new TieFighter(ctx,tieImg);
+    ties[2] = new TieFighter(ctx,tieImg);
+    ties[3] = new TieFighter(ctx,tieImg);
+  }
+
+  xwingImg.onload = function(){
+    xwing = new XwingFighter(ctx, xwingImg);
+  }
+
+  tieImg.src = "./images/tie2.png";
+  xwingImg.src = "./images/xwing2.png";
 
   // Zeichen-Funktion
   function draw() {
@@ -66,11 +79,30 @@ function Init() {
     for (let f in fingers) {
       if (fingers[f]) {
         let finger = fingers[f];
+        if(finger.x > 100){
+          ctx.beginPath();
+          ctx.fillStyle = "green";
+          ctx.fillRect(20,10,10,10);
+          ctx.closePath();
+        }
       }
     }
+
+    ctx.beginPath();
+    ctx.fillStyle = "red";
+    ctx.strokeStyle = "white";
+    ctx.arc(70, 750, 25, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+    ctx.closePath();
+
+    if(xwing)
+      xwing.draw(ctx);
+
     for(let tie of ties){
-      tie.draw(ctx, window.innerWidth, window.innerHeight)
+      tie.draw(ctx);
     }
+
     requestAnimationFrame(draw);
   }
   draw(); // Einmaliges Starten, danach sorgt requestAnimationFrame fuer die Aufrufe

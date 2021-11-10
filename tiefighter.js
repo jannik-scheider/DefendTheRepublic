@@ -1,36 +1,25 @@
 export default class Tie {
-    constructor(context) {
-      this.img = new Image(20,20);
-      this.img.src = "./images/tie.png";
+    constructor(context, img) {
+      this.img = img;
       this.x = 0;
       this.y= 0;
-      this.vx =  5;
-      this.vy = 2;
+      this.speed = 100;
       this.ctxWidth = context.canvas.width;
       this.ctxHeight = context.canvas.height;
       this.generateRandomStartPosition();
     }
 
     draw(context){
-      context.beginPath();
-      context.fillStyle = "red";
-      context.fillRect(this.x, this.y, 50,50);
-      context.closePath();
-      this.x += this.vx;
-      this.y += this.vy;
+      let xwing_x = 150;
+      let xwing_y = 400;
+      let vector_x = xwing_x - this.x;
+      let vector_y = xwing_y - this.y;
 
-      if (this.y + this.vy > this.ctxHeight || this.y + this.vy < 0) {
-        this.vy = -this.vy;
-      }
-      if (this.x + this.vx > this.ctxWidth || this.x + this.vx < 0) {
-        this.vx = -this.vx;
-      }
+      this.x =  this.x + (vector_x/this.speed);
+      this.y = this.y + (vector_y/this.speed);
+
+      context.drawImage(this.img, this.x, this.y,40,40);
       
-      function drawImageActualSize() {
-        context.drawImage(this, this.x, this.y, this.width, this.height);
-      }
-
-      this.img.onload = drawImageActualSize; // Draw when image has loaded
       this.checkCollision();
     }
 
