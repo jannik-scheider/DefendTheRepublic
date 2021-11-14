@@ -152,17 +152,18 @@ function Init() {
           if(isShotPressed(finger.x, finger.y, shotCircleX, shotCircleY, 30)){
             let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), vector_x, vector_y);
             shots.push(shot);
+            drawCircle(greenCircleX,greenCircleY,80,"green");
         }
 
         
-        }else{
-          drawCircle(greenCircleX,greenCircleY,20,"red");
-          xwing.draw(ctx,flight_x,flight_y, rad);
-        }
+      }else{
+        drawCircle(greenCircleX,greenCircleY,20,"red");
+        xwing.draw(ctx,flight_x,flight_y, rad);
+      }
 
-        for(let shot of shots){
-          shot.moveShot(rad, ctx);
-        }
+      for(let shot of shots){
+        shot.moveShot(rad, ctx);
+      }
       
     }
 
