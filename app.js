@@ -109,31 +109,36 @@ function Init() {
     }
   }
 
+
+  let greenCircleX = canvas.width - canvas.width/4;
+  let greenCircleY = canvas.height - canvas.height/8;
+  let shotCircleX = canvas.width/4;
+  let shotCircleY = canvas.height - canvas.height/8;
   // Zeichen-Funktion
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawCircle(270,720,80,"green");
+    drawCircle(greenCircleX,greenCircleY,80,"green");
   
     //shot button 
-    drawCircle(80, 750, 30, "red");
+    drawCircle(shotCircleX, shotCircleY, 30, "red");
 
     for (let f in fingers) {
       if(xwing){
         if (fingers[f]) {
           let finger = fingers[f];
-          if(xwing.isTouchinCircle(finger.x, finger.y, 270, 720, 80)){
+          if(xwing.isTouchinCircle(finger.x, finger.y, greenCircleX, greenCircleY, 80)){
             drawCircle(finger.x, finger.y, 20, "red");
             circle_Path_x = finger.x;
             circle_Path_y = finger.y;
-            let ankathete = xwing.calculateAnkathete(720, finger.y);
-            let gegenkathete = xwing.calculateGegenkathete(270, finger.x);
-            let quadrant = xwing.whichQuadrant(finger.x, finger.y, 270,720);
+            let ankathete = xwing.calculateAnkathete(greenCircleY, finger.y);
+            let gegenkathete = xwing.calculateGegenkathete(greenCircleX, finger.x);
+            let quadrant = xwing.whichQuadrant(finger.x, finger.y, greenCircleX,greenCircleY);
             rad = xwing.calculateAngle(ankathete, gegenkathete, quadrant)* Math.PI/180;
   
-            vector_x = finger.x - 270;
-            vector_y = finger.y - 720;
+            vector_x = finger.x - greenCircleX;
+            vector_y = finger.y - greenCircleY;
   
-            if(finger.x == 270 && finger.y == 720){
+            if(finger.x == greenCircleX && finger.y == greenCircleY){
               xwing.draw(ctx,flight_x, flight_y, rad);
             }else{
               flight_x =  flight_x + (vector_x/speed);
@@ -142,16 +147,16 @@ function Init() {
             }
           }else{
             drawCircle(circle_Path_x, circle_Path_y, 20, "red");
-            xwing.draw(ctx,flight_x,flight_y, rad);
+            xwing.draw(ctx,flight_x, flight_y, rad);
           }
-          if(isShotPressed(finger.x, finger.y, 80, 750, 30)){
+          if(isShotPressed(finger.x, finger.y, shotCircleX, shotCircleY, 30)){
             let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), vector_x, vector_y);
             shots.push(shot);
         }
 
         
         }else{
-          drawCircle(270,720,20,"red");
+          drawCircle(greenCircleX,greenCircleY,20,"red");
           xwing.draw(ctx,flight_x,flight_y, rad);
         }
 
