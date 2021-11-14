@@ -1,19 +1,19 @@
 export default class Tie {
-    constructor(context, img) {
+    constructor(context, img, xwing) {
       this.img = img;
       this.x = 0;
       this.y= 0;
-      this.speed = 100;
+      this.spawnX = 0;
+      this.spawnY = 0;
+      this.speed = 1000;
       this.ctxWidth = context.canvas.width;
       this.ctxHeight = context.canvas.height;
       this.generateRandomStartPosition();
     }
 
-    draw(context){
-      let xwing_x = 150;
-      let xwing_y = 400;
-      let vector_x = xwing_x - this.x;
-      let vector_y = xwing_y - this.y;
+    draw(context, xwing_x, xwing_y){
+      let vector_x = xwing_x - this.spawnX;
+      let vector_y = xwing_y - this.spawnY;
 
       this.x =  this.x + (vector_x/this.speed);
       this.y = this.y + (vector_y/this.speed);
@@ -30,22 +30,30 @@ export default class Tie {
           //top
           this.x = Math.floor(Math.random() *  this.ctxWidth);
           this.y = 0;
+          this.spawnX = this.x;
+          this.spawnY = this.y;
           break;
         case 2:
           //right
           this.x =  this.ctxWidth;
           //console.log(this.ctxWidth);
           this.y = Math.floor(Math.random() *  this.ctxHeight);
+          this.spawnX = this.x;
+          this.spawnY = this.y;
           break;
         case 3:
           //bottom
           this.x = Math.floor(Math.random() * this.ctxWidth);
           this.y =  this.ctxHeight;
+          this.spawnX = this.x;
+          this.spawnY = this.y;
           break;
         case 4:
           //left
           this.x = 0;
           this.y = Math.floor(Math.random() *  this.ctxHeight);
+          this.spawnX = this.x;
+          this.spawnY = this.y;
           break;
         default: 
           console.log("error");
