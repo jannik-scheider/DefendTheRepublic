@@ -66,6 +66,17 @@ function Init() {
     ctx.resetTransform();
   }
 
+  function isShotPressed(touch_x, touch_y, x, y, radius){
+    let vx = touch_x - x;
+    let vy = touch_y - y;
+    let vector_length = Math.sqrt((vx*vx) + (vy* vy));
+
+    if(vector_length > radius){
+        return false;
+    }else{
+        return true;
+    }
+  }
 
   let ties = [];
   let xwing;
@@ -89,6 +100,7 @@ function Init() {
   //vector zwischen touchpunkt und mittelpunkt von kreis 
   let vector_x = 0;
   let vector_y = 0;
+
   let speed = 50;
   let flight_x = 150;
   let flight_y = 400;
@@ -96,24 +108,11 @@ function Init() {
   let circle_Path_y;
   let rad;
   let shots = [];
-
-  function isShotPressed(touch_x, touch_y, x, y, radius){
-    let vx = touch_x - x;
-    let vy = touch_y - y;
-    let vector_length = Math.sqrt((vx*vx) + (vy* vy));
-
-    if(vector_length > radius){
-        return false;
-    }else{
-        return true;
-    }
-  }
-
-
   let greenCircleX = canvas.width - canvas.width/4;
   let greenCircleY = canvas.height - canvas.height/8;
   let shotCircleX = canvas.width/4;
   let shotCircleY = canvas.height - canvas.height/8;
+
   // Zeichen-Funktion
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -150,29 +149,35 @@ function Init() {
             xwing.draw(ctx,flight_x, flight_y, rad);
           }
           if(isShotPressed(finger.x, finger.y, shotCircleX, shotCircleY, 30)){
-            let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), vector_x, vector_y);
+            let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), vector_x, vector_y, rad);
             shots.push(shot);
             drawCircle(greenCircleX,greenCircleY,80,"green");
         }
 
         
       }else{
-        drawCircle(greenCircleX,greenCircleY,20,"red");
         xwing.draw(ctx,flight_x,flight_y, rad);
       }
 
       for(let shot of shots){
-        shot.moveShot(rad, ctx);
+        shot.moveShot(ctx);
       }
-      
+
     }
 
     for(let tie of ties){
       tie.draw(ctx, xwing.get_x(), xwing.get_y());
+      for(let shot of shots){
+        if(shot.checkHit(tie.getX(), tie.getY())){
+          console.log("HIT");
+          shots.splice(shots.indexOf(shot), 1);
+          ties.splice(ties.indexOf(tie), 1);
+        }
+      }
     }
+
+    
   }
-
-
 
     requestAnimationFrame(draw);
   }

@@ -5,6 +5,8 @@ export default class Tie {
       this.y= 0;
       this.spawnX = 0;
       this.spawnY = 0;
+      this.xwingX = 0;
+      this.xwingY = 0;
       this.speed = 1000;
       this.ctxWidth = context.canvas.width;
       this.ctxHeight = context.canvas.height;
@@ -12,15 +14,19 @@ export default class Tie {
     }
 
     draw(context, xwing_x, xwing_y){
-      let vector_x = xwing_x - this.spawnX;
-      let vector_y = xwing_y - this.spawnY;
+      if(this.xwingX == 0 && this.xwingY == 0){
+        this.xwingX = xwing_x;
+        this.xwingY = xwing_y;
+      }
+      let vector_x = this.xwingX - this.spawnX;
+      let vector_y = this.xwingY - this.spawnY;
 
       this.x =  this.x + (vector_x/this.speed);
       this.y = this.y + (vector_y/this.speed);
 
       context.drawImage(this.img, this.x, this.y,40,40);
       
-      this.checkCollision();
+      this.checkCollision(xwing_x, xwing_y);
     }
 
     generateRandomStartPosition(){
@@ -65,11 +71,18 @@ export default class Tie {
       return Math.floor(Math.random() * 4) + 1;
     }
 
-    checkCollision(){
-      if(this.x > 150 && this.x < 190 && this.y > 400 && this.y < 440){
+    checkCollision(xwingx, xwingy){
+      if((this.x > xwingx && this.x < xwingx+80) && (this.y > xwingy && this.y < xwingy+80)){
         return console.log("game over");
       }
     }
 
+    getX(){
+      return this.x;
+    }
+
+    getY(){
+      return this.y;
+    }
 }
   
