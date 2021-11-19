@@ -85,12 +85,21 @@ export default class Tie {
       }
     }
 
-    getX(){
+    get_x(){
       return this.x;
     }
-
-    getY(){
+  
+    get_y(){
       return this.y;
     }
+
+    checkInCanvas(){
+      if(this.x >= 0 && this.x <= this.ctxWidth && this.y >= 0 && this.y <= this.ctxHeight){
+        return true;
+      }else{
+        return false;
+      }
+    }
+  
 }
   

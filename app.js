@@ -148,7 +148,7 @@ function Init() {
   }
   // berechnet ob ein power up gespawnt wird -> random
   function spawnRandomly(){
-    let spawn = Math.floor(Math.random() * 1000);
+    let spawn = Math.floor(Math.random() * 2000);
     if(spawn == 0){
       return true;
     }else{
@@ -225,6 +225,8 @@ function Init() {
                 //überprüft ob powerup angeklickt wurde
                 for(let powerup of powerups){
                   if(powerup.checkClicked(finger.x, finger.y)){
+                    score += ties.length;
+                    powerups.splice(powerup,1);
                     ties = [];
                     //powerups.splice(powerup, 1);
                   }
@@ -248,19 +250,23 @@ function Init() {
 
             //zeichnet alle tie fighter aus dem array ties
             for(let tie of ties){
-              tie.draw(ctx, xwing.get_x(), xwing.get_y());
-              for(let shot of shots){
-                if(shot.checkHit(tie.getX(), tie.getY())){
-                  //console.log("HIT");
-                  shots.splice(shots.indexOf(shot), 1);
-                  ties.splice(ties.indexOf(tie), 1);
-                  score++;
+              if(tie.checkInCanvas()){
+                tie.draw(ctx, xwing.get_x(), xwing.get_y());
+                for(let shot of shots){
+                  if(shot.checkHit(tie.get_x(), tie.get_y())){
+                    //console.log("HIT");
+                    shots.splice(shots.indexOf(shot), 1);
+                    ties.splice(ties.indexOf(tie), 1);
+                    score++;
+                  }
                 }
-              }
-              if(tie.checkCollision(xwing.get_x(), xwing.get_y())){
-                //console.log("game over");
-                crash.play();
-                gameover = true;
+                if(tie.checkCollision(xwing.get_x(), xwing.get_y())){
+                  //console.log("game over");
+                  crash.play();
+                  gameover = true;
+                }
+              }else{
+                ties.splice(tie, 1);
               }
             }
 
