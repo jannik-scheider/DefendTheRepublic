@@ -35,7 +35,7 @@ export default class Shot{
         let vector_length = Math.sqrt((vector_x*vector_x) + (vector_y* vector_y));
         //let radius_length = Math.sqrt((this.radius*this.radius) + (this.radius*this.radius));
 
-        if(vector_length < 10){
+        if(vector_length < 30){
             return true;
         }else{
             return false;
