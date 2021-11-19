@@ -23,10 +23,11 @@ export default class Tie {
 
       this.x =  this.x + (vector_x/this.speed);
       this.y = this.y + (vector_y/this.speed);
+      context.beginPath();
+      context.translate(this.x, this.y);
+      context.drawImage(this.img, -20, -20, 40,40);
+      context.resetTransform();
 
-      context.drawImage(this.img, this.x, this.y,40,40);
-      
-      this.checkCollision(xwing_x, xwing_y);
     }
 
     generateRandomStartPosition(){
@@ -72,8 +73,15 @@ export default class Tie {
     }
 
     checkCollision(xwingx, xwingy){
-      if((this.x > xwingx && this.x < xwingx+80) && (this.y > xwingy && this.y < xwingy+80)){
-        return console.log("game over");
+      let vector_x = xwingx - this.x;
+      let vector_y = xwingy - this.y;
+      let vector_length = Math.sqrt((vector_x*vector_x) + (vector_y* vector_y));
+      //let radius_length = Math.sqrt((this.radius*this.radius) + (this.radius*this.radius));
+
+      if(vector_length < 60){
+        return true;
+      }else{
+        return false;
       }
     }
 

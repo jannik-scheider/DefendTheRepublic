@@ -3,7 +3,7 @@ export default class Shot{
     constructor(context, x, y, vx, vy){
         this.x = x;
         this.y= y;
-        this.speed = 200;
+        this.speed = 50;
         this.vector_x = vx;
         this.vector_y = vy;
         this.radius = 5;
@@ -15,6 +15,7 @@ export default class Shot{
         const startAngle = 0;
         ctx.fillStyle = "green";
         let endAngle = Math.PI * 2; // End point on circle
+        
         ctx.translate(this.x, this.y);
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, startAngle, endAngle, true);
@@ -34,7 +35,7 @@ export default class Shot{
         let vector_length = Math.sqrt((vector_x*vector_x) + (vector_y* vector_y));
         //let radius_length = Math.sqrt((this.radius*this.radius) + (this.radius*this.radius));
 
-        if(vector_length < 5){
+        if(vector_length < 10){
             return true;
         }else{
             return false;

@@ -42,6 +42,21 @@ function Init() {
   canvas.addEventListener("touchstart",(evt) => {
       evt.preventDefault();
       setFingers(evt.changedTouches);
+
+      for(let f in fingers){
+        if(fingers[f]){
+          let finger = fingers[f];
+          vector_x = finger.x - greenCircleX;
+          vector_y = finger.y - greenCircleY;
+
+          if(isShotPressed(finger.x, finger.y, shotCircleX, shotCircleY, 30)){
+            let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), vector_x, vector_y, rad);
+            shots.push(shot);
+            drawCircle(greenCircleX,greenCircleY,80,"green");
+          }    
+        }
+      }
+      
   },true);
 
   canvas.addEventListener("touchmove",(evt) => {
@@ -66,6 +81,13 @@ function Init() {
     ctx.resetTransform();
   }
 
+  function drawRect(x,y,width, height, color,ctx){
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.fillRect(x,y,width,height);
+    ctx.resetTransform();
+  }
+
   function isShotPressed(touch_x, touch_y, x, y, radius){
     let vx = touch_x - x;
     let vy = touch_y - y;
@@ -75,6 +97,39 @@ function Init() {
         return false;
     }else{
         return true;
+    }
+  }
+
+  function breakScreen(context, score){
+    context.beginPath();
+    context.fillStyle = "blue";
+    context.fillRect(100,200,200,50);
+    context.font = '48px serif';
+    context.fillText("Play", 100, 200);
+    context.resetTransform();
+  }
+
+  function play(touchx, touchy){
+    if(touchx > 100 && touchx < 300 && touchy > 200 && touchy < 250){
+      draw();
+    }
+  }
+
+  function breakk(touchx, touchy, score){
+    if(touchx > 200 && touchx < 250 && touchy > 100 && touchy < 150){
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      breakScreen(ctx, score);
+    }
+  }
+
+  function generateSpwan(){
+    let spawn = Math.floor(Math.random() * 300);
+    if(spawn == 0){
+      console.log("true");
+      return true;
+    }else{
+      console.log("false");
+      return false;
     }
   }
 
@@ -90,8 +145,6 @@ function Init() {
   tieImg.onload = function(){
     ties[0] = new TieFighter(ctx,tieImg);
     ties[1] = new TieFighter(ctx,tieImg);
-    ties[2] = new TieFighter(ctx,tieImg);
-    ties[3] = new TieFighter(ctx,tieImg);
   }
 
   tieImg.src = "./images/tie2.png";
@@ -112,12 +165,13 @@ function Init() {
   let greenCircleY = canvas.height - canvas.height/8;
   let shotCircleX = canvas.width/4;
   let shotCircleY = canvas.height - canvas.height/8;
+  let score = 0;
 
   // Zeichen-Funktion
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCircle(greenCircleX,greenCircleY,80,"green");
-  
+    drawRect(200,100,50,50,"blue",ctx);
     //shot button 
     drawCircle(shotCircleX, shotCircleY, 30, "red");
 
@@ -148,22 +202,24 @@ function Init() {
             drawCircle(circle_Path_x, circle_Path_y, 20, "red");
             xwing.draw(ctx,flight_x, flight_y, rad);
           }
-          if(isShotPressed(finger.x, finger.y, shotCircleX, shotCircleY, 30)){
-            let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), vector_x, vector_y, rad);
-            shots.push(shot);
-            drawCircle(greenCircleX,greenCircleY,80,"green");
-        }
 
-        
-      }else{
-        xwing.draw(ctx,flight_x,flight_y, rad);
-      }
+          breakk(finger.x, finger.y, score);
+          play(finger.x, finger.y);
+
+        }else{
+          xwing.draw(ctx,flight_x,flight_y, rad);
+        }
 
       for(let shot of shots){
         shot.moveShot(ctx);
       }
 
     }
+
+    if(generateSpwan()){
+      ties.push(new TieFighter(ctx,tieImg));
+    }
+
 
     for(let tie of ties){
       tie.draw(ctx, xwing.get_x(), xwing.get_y());
@@ -172,13 +228,22 @@ function Init() {
           console.log("HIT");
           shots.splice(shots.indexOf(shot), 1);
           ties.splice(ties.indexOf(tie), 1);
+          score++;
         }
+      }
+
+      if(tie.checkCollision(xwing.get_x(), xwing.get_y())){
+        //console.log("game over");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '48px serif';
+        ctx.fillText("game over", 100,300);
+        ctx.fillText("Score " + score, 100, 400);
+        break;
       }
     }
 
     
   }
-
     requestAnimationFrame(draw);
   }
   draw(); // Einmaliges Starten, danach sorgt requestAnimationFrame fuer die Aufrufe
