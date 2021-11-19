@@ -6,6 +6,7 @@ import { getCanvas, rect, circle, the_U } from "./canvas_lib.js";
 import XwingFighter from "./xwingfighter.js";
 import TieFighter from "./tiefighter.js";
 import Shot from "./shot.js";
+import Powerup from "./powerup.js";
 
 
 // outer function
@@ -15,11 +16,13 @@ function Init() {
   canvas.height = window.innerHeight;
   let ctx = canvas.getContext("2d");
 
-
+  let powerups = [];
   let ties = [];
   let xwing;
   let tieImg = new Image();
   let xwingImg = new Image();
+  let powerupImg = new Image();
+
   //vector zwischen touchpunkt und mittelpunkt von kreis 
   let vector_x = 0;
   let vector_y = 0;
@@ -38,6 +41,11 @@ function Init() {
   let shotCircleX = canvas.width/4;
   let shotCircleY = canvas.height - canvas.height/8;
   let score = 0;
+  let gameover = false;
+
+  //game sounds
+  let mission = new Audio('./audio/military-mission.mp3');
+  let crash = new Audio('./audio/crash.mp3');
 
 
   window.addEventListener("resize", function (event) {
@@ -79,6 +87,8 @@ function Init() {
                   shots.push(shot);
                   drawCircle(greenCircleX,greenCircleY,80,"green");
                   timeOfFirstTouch = timeOfFirstTouch + delta;
+                  let lasersound = new Audio('./audio/laser-gun.mp3');
+                  lasersound.play();
                 }  
               }
         }
@@ -89,7 +99,6 @@ function Init() {
 
   canvas.addEventListener("touchmove",(evt) => {
       evt.preventDefault();
-      console.log("test");
       setFingers(evt.changedTouches);
   }, true);
 
@@ -120,21 +129,30 @@ function Init() {
   function isShotPressed(touch_x, touch_y, x, y, radius){
     let vx = touch_x - x;
     let vy = touch_y - y;
-    let vector_length = Math.sqrt((vx*vx) + (vy* vy));
+    let vlength = Math.sqrt((vx*vx) + (vy* vy));
 
-    if(vector_length > radius){
+    if(vlength > radius){
         return false;
     }else{
         return true;
     }
   }
-
+  //wahrscheinlichkeitsrechnung ob ein Tiefighter gespawnt werden soll darüber kann schwierigkeit eingestellt werden
   function generateSpwan(){
     let spawn = Math.floor(Math.random() * 300);
     if(spawn == 0){
       return true;
     }else{
       return false;
+    }
+  }
+  // berechnet ob ein power up gespawnt wird -> random
+  function spawnRandomly(){
+    let spawn = Math.floor(Math.random() * 1000);
+    if(spawn == 0){
+      return true;
+    }else{
+      return false; 
     }
   }
 
@@ -147,89 +165,152 @@ function Init() {
     ties[1] = new TieFighter(ctx,tieImg);
   }
 
+ 
   tieImg.src = "./images/tie2.png";
   xwingImg.src = "./images/xwing2.png";
-
-
+  powerupImg.src = "./images/powerup.png";
+  let start = true;
   // Zeichen-Funktion
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //Zeichnet grünen Steuerkreis
     drawCircle(greenCircleX,greenCircleY,80,"green");
-    drawRect(200,100,50,50,"blue");
     //shot button 
     drawCircle(shotCircleX, shotCircleY, 30, "red");
+    if(start){
+      ctx.font = '20px serif';
+      ctx.fillStyle = "white";
+      ctx.fillText("click here to start", greenCircleX - 70, greenCircleY);
+    }
+    //draw score display
+    ctx.font = '20px serif';
+    ctx.fillStyle = "white";
+    ctx.fillText("score: " + score, canvas.width/8, canvas.height/10);
 
-    for (let f in fingers) {
-      if(xwing){
-        if (fingers[f]) {
-          let finger = fingers[f];
-          if(xwing.isTouchinCircle(finger.x, finger.y, greenCircleX, greenCircleY, 80)){
-            drawCircle(finger.x, finger.y, 20, "red");
-            circle_Path_x = finger.x;
-            circle_Path_y = finger.y;
-            let ankathete = xwing.calculateAnkathete(greenCircleY, finger.y);
-            let gegenkathete = xwing.calculateGegenkathete(greenCircleX, finger.x);
-            let quadrant = xwing.whichQuadrant(finger.x, finger.y, greenCircleX,greenCircleY);
-            rad = xwing.calculateAngle(ankathete, gegenkathete, quadrant)* Math.PI/180;
-  
-            vector_x = finger.x - greenCircleX;
-            vector_y = finger.y - greenCircleY;
-            vector_length = Math.sqrt((vector_x*vector_x) + (vector_y* vector_y));
-            evector_x = 1/vector_length * vector_x;
-            evector_y = 1/vector_length * vector_y;
-  
-            if(finger.x == greenCircleX && finger.y == greenCircleY){
-              xwing.draw(ctx,flight_x, flight_y, rad);
-            }else{
-              flight_x =  flight_x + (vector_x/speed);
-              flight_y = flight_y + (vector_y/speed);
-              xwing.draw(ctx,flight_x, flight_y, rad);
+    if(!gameover){
+      mission.play();
+          for (let f in fingers) {
+            if(xwing){
+              if (fingers[f]) {
+                start = false;
+                let finger = fingers[f];
+                //checkt ob der finger noch im grünen Steuerkreis ist wenn ja wird die Flugrichtung neu berechnet
+                if(xwing.isTouchinCircle(finger.x, finger.y, greenCircleX, greenCircleY, 80)){
+                  drawCircle(finger.x, finger.y, 20, "red");
+                  circle_Path_x = finger.x;
+                  circle_Path_y = finger.y;
+                  let ankathete = xwing.calculateAnkathete(greenCircleY, finger.y);
+                  let gegenkathete = xwing.calculateGegenkathete(greenCircleX, finger.x);
+                  let quadrant = xwing.whichQuadrant(finger.x, finger.y, greenCircleX,greenCircleY);
+                  rad = xwing.calculateAngle(ankathete, gegenkathete, quadrant)* Math.PI/180;
+        
+                  vector_x = finger.x - greenCircleX;
+                  vector_y = finger.y - greenCircleY;
+                  //einheitsvektor berechnen für ein Schuss
+                  vector_length = Math.sqrt((vector_x*vector_x) + (vector_y* vector_y));
+                  evector_x = 1/vector_length * vector_x;
+                  evector_y = 1/vector_length * vector_y;
+                  //wenn der Touchpunkt in der mitte des Steuerkreises ist keine bewegung 
+                  if(finger.x == greenCircleX && finger.y == greenCircleY){
+                    xwing.draw(ctx,flight_x, flight_y, rad);
+                  }else{ 
+                    flight_x =  flight_x + (vector_x/speed);
+                    flight_y = flight_y + (vector_y/speed);
+                    xwing.draw(ctx,flight_x, flight_y, rad);
+                  }
+                }else{
+                  drawCircle(circle_Path_x, circle_Path_y, 20, "red");
+                  xwing.draw(ctx,flight_x, flight_y, rad);
+                }
+                //überprüft ob powerup angeklickt wurde
+                for(let powerup of powerups){
+                  if(powerup.checkClicked(finger.x, finger.y)){
+                    ties = [];
+                    //powerups.splice(powerup, 1);
+                  }
+                }
+
+              //wenn kein Touch bleibt XwingFighter stehen
+              }else{
+                xwing.draw(ctx,flight_x,flight_y, rad);
+              }
+              //zeichnet alle aktuellen Schüsse im Array
+              for(let shot of shots){
+                shot.moveShot(ctx);
+              }
             }
-          }else{
-            drawCircle(circle_Path_x, circle_Path_y, 20, "red");
-            xwing.draw(ctx,flight_x, flight_y, rad);
+
+          
+            // berechnet zufällig ob ein tiefighter gespawnt werden soll
+            if(generateSpwan()){
+              ties.push(new TieFighter(ctx,tieImg));
+            }
+
+            //zeichnet alle tie fighter aus dem array ties
+            for(let tie of ties){
+              tie.draw(ctx, xwing.get_x(), xwing.get_y());
+              for(let shot of shots){
+                if(shot.checkHit(tie.getX(), tie.getY())){
+                  //console.log("HIT");
+                  shots.splice(shots.indexOf(shot), 1);
+                  ties.splice(ties.indexOf(tie), 1);
+                  score++;
+                }
+              }
+              if(tie.checkCollision(xwing.get_x(), xwing.get_y())){
+                //console.log("game over");
+                crash.play();
+                gameover = true;
+              }
+            }
+
+            //spawn power up randomly
+            if(spawnRandomly()){
+              powerups.push(new Powerup(ctx, powerupImg));
+            }
+
+            if(powerups != undefined){
+              for(let powerup of powerups){
+                powerup.draw(ctx);
+              }
+            }
+
           }
-
-        }else{
-          xwing.draw(ctx,flight_x,flight_y, rad);
-        }
-
-      for(let shot of shots){
-        shot.moveShot(ctx);
-      }
-
-    }
-
-    if(generateSpwan()){
-      ties.push(new TieFighter(ctx,tieImg));
-    }
-
-
-    for(let tie of ties){
-      tie.draw(ctx, xwing.get_x(), xwing.get_y());
-      for(let shot of shots){
-        if(shot.checkHit(tie.getX(), tie.getY())){
-          console.log("HIT");
-          shots.splice(shots.indexOf(shot), 1);
-          ties.splice(ties.indexOf(tie), 1);
-          score++;
-        }
-      }
-
-      if(tie.checkCollision(xwing.get_x(), xwing.get_y())){
-        //console.log("game over");
+              
+      }else{
+        ties = [];
+        shots = [];
+        powerups = [];
+        score = 0;
+        let x = canvas.width/4;
+        let y = canvas.height/2;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        flight_x = 150;
+        flight_y = 400;
         ctx.font = '48px serif';
+        ctx.fillStyle = "white";
         ctx.fillText("game over", 100,300);
         ctx.fillText("Score " + score, 100, 400);
-        break;
-      }
-    }
+        ctx.fillStyle = "blue";
+        ctx.fillRect(x, y, 250,100);
+        ctx.fillStyle = "white";
+        ctx.fillText("try again", x+ 50, y+ 50);
+        for(let f in fingers){
+          if(fingers[f]){
+            let finger = fingers[f];
+            if(finger.x > x && finger.x < x+250 && finger.y > y && finger.y < y+100){
+              gameover = false;
+            }
+          }
+        }
 
+        mission.pause();
+      }
+ 
     
-  }
     requestAnimationFrame(draw);
   }
+ 
   draw(); // Einmaliges Starten, danach sorgt requestAnimationFrame fuer die Aufrufe
 
 }

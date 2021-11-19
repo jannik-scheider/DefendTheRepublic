@@ -30,6 +30,18 @@ export default class XwingFighter{
   get_y(){
     return this.y;
   }
+
+  set_x(x){
+      console.log(x);
+      this.x = x;
+      console.log(this.x);
+  }
+  set_y(y){
+      
+    console.log(y);
+      this.y = y;
+      console.log(this.y);
+  }
     //ausrechnen des winkels immer max 90 deshalb + quadrant -> winkel bei 90 und 270 90 abziehen da rechnung sonst winkel falsch angibt bei gegenkathete und ankathete
   calculateAngle(ankathete, gegenkathete, quadrant){
       if(quadrant == 90){
