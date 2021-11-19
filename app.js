@@ -15,6 +15,29 @@ function Init() {
   canvas.height = window.innerHeight;
   let ctx = canvas.getContext("2d");
 
+
+  let ties = [];
+  let xwing;
+  let tieImg = new Image();
+  let xwingImg = new Image();
+  //vector zwischen touchpunkt und mittelpunkt von kreis 
+  let vector_x = 0;
+  let vector_y = 0;
+
+  let speed = 50;
+  let flight_x = 150;
+  let flight_y = 400;
+  let circle_Path_x;
+  let circle_Path_y;
+  let rad;
+  let shots = [];
+  let greenCircleX = canvas.width - canvas.width/4;
+  let greenCircleY = canvas.height - canvas.height/8;
+  let shotCircleX = canvas.width/4;
+  let shotCircleY = canvas.height - canvas.height/8;
+  let score = 0;
+
+
   window.addEventListener("resize", function (event) {
     console.log("resize");
     ctx.canvas.width = window.innerWidth;
@@ -59,8 +82,10 @@ function Init() {
       
   },true);
 
+
   canvas.addEventListener("touchmove",(evt) => {
       evt.preventDefault();
+      console.log("test");
       setFingers(evt.changedTouches);
   }, true);
 
@@ -81,7 +106,7 @@ function Init() {
     ctx.resetTransform();
   }
 
-  function drawRect(x,y,width, height, color,ctx){
+  function drawRect(x,y,width, height, color){
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.fillRect(x,y,width,height);
@@ -100,43 +125,14 @@ function Init() {
     }
   }
 
-  function breakScreen(context, score){
-    context.beginPath();
-    context.fillStyle = "blue";
-    context.fillRect(100,200,200,50);
-    context.font = '48px serif';
-    context.fillText("Play", 100, 200);
-    context.resetTransform();
-  }
-
-  function play(touchx, touchy){
-    if(touchx > 100 && touchx < 300 && touchy > 200 && touchy < 250){
-      draw();
-    }
-  }
-
-  function breakk(touchx, touchy, score){
-    if(touchx > 200 && touchx < 250 && touchy > 100 && touchy < 150){
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      breakScreen(ctx, score);
-    }
-  }
-
   function generateSpwan(){
     let spawn = Math.floor(Math.random() * 300);
     if(spawn == 0){
-      console.log("true");
       return true;
     }else{
-      console.log("false");
       return false;
     }
   }
-
-  let ties = [];
-  let xwing;
-  let tieImg = new Image();
-  let xwingImg = new Image();
 
   xwingImg.onload = function(){
     xwing = new XwingFighter(ctx, xwingImg);
@@ -150,28 +146,12 @@ function Init() {
   tieImg.src = "./images/tie2.png";
   xwingImg.src = "./images/xwing2.png";
 
-  //vector zwischen touchpunkt und mittelpunkt von kreis 
-  let vector_x = 0;
-  let vector_y = 0;
-
-  let speed = 50;
-  let flight_x = 150;
-  let flight_y = 400;
-  let circle_Path_x;
-  let circle_Path_y;
-  let rad;
-  let shots = [];
-  let greenCircleX = canvas.width - canvas.width/4;
-  let greenCircleY = canvas.height - canvas.height/8;
-  let shotCircleX = canvas.width/4;
-  let shotCircleY = canvas.height - canvas.height/8;
-  let score = 0;
 
   // Zeichen-Funktion
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCircle(greenCircleX,greenCircleY,80,"green");
-    drawRect(200,100,50,50,"blue",ctx);
+    drawRect(200,100,50,50,"blue");
     //shot button 
     drawCircle(shotCircleX, shotCircleY, 30, "red");
 
@@ -202,9 +182,6 @@ function Init() {
             drawCircle(circle_Path_x, circle_Path_y, 20, "red");
             xwing.draw(ctx,flight_x, flight_y, rad);
           }
-
-          breakk(finger.x, finger.y, score);
-          play(finger.x, finger.y);
 
         }else{
           xwing.draw(ctx,flight_x,flight_y, rad);
