@@ -3,7 +3,7 @@ export default class Shot{
     constructor(context, x, y, vx, vy){
         this.x = x;
         this.y= y;
-        this.speed = 50;
+        this.speed = 2;
         this.vector_x = vx;
         this.vector_y = vy;
         this.radius = 5;
@@ -25,8 +25,8 @@ export default class Shot{
 
     moveShot(ctx){
         this.drawShot(ctx);
-        this.x += this.vector_x/this.speed;
-        this.y += this.vector_y/this.speed;
+        this.x += this.vector_x*this.speed;
+        this.y += this.vector_y*this.speed;
     }
 
     checkHit(tiex, tiey){

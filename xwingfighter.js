@@ -12,7 +12,6 @@ export default class XwingFighter{
     ctx.beginPath();
     ctx.translate(x,y);
     ctx.rotate(rad);
-    ctx.fillRect(-width/2,-height/2,width,height);
     ctx.drawImage(this.img,-width/2,-height/2,width,height);
     ctx.resetTransform();
 }

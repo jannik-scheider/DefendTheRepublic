@@ -23,7 +23,9 @@ function Init() {
   //vector zwischen touchpunkt und mittelpunkt von kreis 
   let vector_x = 0;
   let vector_y = 0;
-
+  let vector_length = 0;
+  let evector_x = 0;
+  let evector_y = 0;
   let speed = 50;
   let flight_x = 150;
   let flight_y = 400;
@@ -61,6 +63,7 @@ function Init() {
       fingers[t.identifier] = undefined;
     }
   }
+  let timeOfFirstTouch = 0;
 
   canvas.addEventListener("touchstart",(evt) => {
       evt.preventDefault();
@@ -69,14 +72,15 @@ function Init() {
       for(let f in fingers){
         if(fingers[f]){
           let finger = fingers[f];
-          vector_x = finger.x - greenCircleX;
-          vector_y = finger.y - greenCircleY;
-
-          if(isShotPressed(finger.x, finger.y, shotCircleX, shotCircleY, 30)){
-            let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), vector_x, vector_y, rad);
-            shots.push(shot);
-            drawCircle(greenCircleX,greenCircleY,80,"green");
-          }    
+          let delta = new Date().getTime() - timeOfFirstTouch;
+              if(isShotPressed(finger.x, finger.y, shotCircleX, shotCircleY, 30)){
+                if(delta > 300){
+                  let shot = new Shot(ctx, xwing.get_x(), xwing.get_y(), evector_x, evector_y, rad);
+                  shots.push(shot);
+                  drawCircle(greenCircleX,greenCircleY,80,"green");
+                  timeOfFirstTouch = timeOfFirstTouch + delta;
+                }  
+              }
         }
       }
       
@@ -97,12 +101,12 @@ function Init() {
 
   function drawCircle(x, y, radius, color) {
     const startAngle = 0;
-    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
     let endAngle = Math.PI * 2; // End point on circle
     ctx.translate(x, y);
     ctx.beginPath();
     ctx.arc(0, 0, radius, startAngle, endAngle, true);
-    ctx.fill();
+    ctx.stroke();
     ctx.resetTransform();
   }
 
@@ -170,6 +174,9 @@ function Init() {
   
             vector_x = finger.x - greenCircleX;
             vector_y = finger.y - greenCircleY;
+            vector_length = Math.sqrt((vector_x*vector_x) + (vector_y* vector_y));
+            evector_x = 1/vector_length * vector_x;
+            evector_y = 1/vector_length * vector_y;
   
             if(finger.x == greenCircleX && finger.y == greenCircleY){
               xwing.draw(ctx,flight_x, flight_y, rad);
