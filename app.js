@@ -281,7 +281,6 @@ function Init() {
         ties = [];
         shots = [];
         powerups = [];
-        score = 0;
         let x = canvas.width/4;
         let y = canvas.height/2;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -299,6 +298,7 @@ function Init() {
           if(fingers[f]){
             let finger = fingers[f];
             if(finger.x > x && finger.x < x+250 && finger.y > y && finger.y < y+100){
+              score = 0;
               gameover = false;
             }
           }
